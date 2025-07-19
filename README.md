@@ -8,11 +8,13 @@ The H1EMU server location where these files are (or use your own server's):
 E:\SteamLibrary\steamapps\common\H1EMU\H1EmuServerFiles\h1z1-server\data\2016\zoneData
 
 lineups:
+
 Z1_crates.json
 Z1_doors.json
 Z1_items.json
 Z1_items_og.json
 Z1_taskProps.json
+
 
 Z1_destroyables.json
 Z1_npcs.json
