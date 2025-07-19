@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H1Z1 Items Map Visualizer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #1a1a1a; color: #fff; }
+        h1 { margin-top: 0; font-size: 24px; }
+        h3 { margin-top: 0; }
+        
+        .main-layout {
+            display: flex;
+            gap: 20px;
+        }
+        .sidebar {
+            flex: 0 0 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .map-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 0;
+        }
+        
+        .controls, .spawner-controls, .overlay-controls { background-color: #2a2a2a; padding: 20px; border-radius: 8px; }
+        .file-input-group { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+        input[type="file"] { background-color: #333; color: #fff; padding: 10px; border: 1px solid #555; border-radius: 4px; }
+        button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+        button:hover { background-color: #45a049; }
+        button:disabled { background-color: #666; cursor: not-allowed; }
+        .map-container { background-color: #2a2a2a; border-radius: 8px; padding: 20px; position: relative; }
+        
+        canvas { 
+            border: 1px solid #444; 
+            background-color: #000; 
+            cursor: crosshair;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1;
+        }
+
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+        .stat-item { background-color: #333; padding: 10px; border-radius: 4px; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #4CAF50; }
+        .stat-label { font-size: 12px; color: #ccc; }
+        .progress { width: 100%; height: 20px; background-color: #333; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .progress-bar { height: 100%; background-color: #4CAF50; transition: width 0.3s ease; }
+        .zoom-controls { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 10; }
+        .zoom-btn { width: 30px; height: 30px; padding: 0; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .tooltip { 
+            position: fixed; 
+            background-color: rgba(0, 0, 0, 0.9); 
+            color: white; 
+            padding: 8px 12px; 
+            border-radius: 4px; 
+            font-size: 12px; 
+            pointer-events: none; 
+            z-index: 1000; 
+            display: none;
+            max-width: 300px;
+            border: 1px solid #444;
+        }
+        .tooltip-item {
+            display: flex;
+            align-items: center;
+            margin: 4px 0;
+        }
+        .tooltip-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+            border: 1px solid #666;
+        }
+        .spawner-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px; max-height: 400px; overflow-y: auto; border: 1px solid #444; padding: 10px; border-radius: 4px; }
+        .spawner-item { display: flex; align-items: center; padding: 5px; background-color: #333; border-radius: 4px; font-size: 12px; }
+        .spawner-checkbox { margin-right: 8px; }
+        .spawner-color { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid #666; }
+        .spawner-label { flex: 1; cursor: pointer; }
+        .spawner-count { color: #888; font-size: 10px; }
+        .toggle-buttons { display: flex; gap: 10px; margin-bottom: 6px; }
+        .search-box { width: 100%; padding: 8px; background-color: #333; border: 1px solid #555; border-radius: 4px; color: #fff; margin-bottom: 5px; box-sizing: border-box; }
+        .control-group { margin-top: 8px; display: flex; align-items: center; gap: 10px; }
+        input[type="number"] { width: 80px; padding: 8px; background-color: #333; border: 1px solid #555; border-radius: 4px; color: #fff; }
+        
+        .lock-btn {
+            background-color: #ff9800;
+            position: relative;
+        }
+        .lock-btn:hover {
+            background-color: #f57c00;
+        }
+        .lock-btn.locked {
+            background-color: #f44336;
+        }
+        .lock-btn.locked:hover {
+            background-color: #d32f2f;
+        }
+        .lock-status {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #333;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #ccc;
+        }
+        .lock-status.locked {
+            background-color: #4a2c2a;
+            color: #ffcdd2;
+        }
+        .image-status {
+            margin-bottom: 6px;
+            padding: 8px;
+            background-color: #333;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #ccc;
+        }
+        .image-status.loaded {
+            background-color: #2e4a2e;
+            color: #90ee90;
+            border: 1px solid #4a6b4a;
+        }
+        .locked-view {
+            cursor: default !important;
+        }
+        
+        .success-status {
+            margin-bottom: 6px;
+            padding: 8px;
+            background-color: #2e4a2e;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #90ee90;
+            border: 1px solid #4a6b4a;
+            display: none;
+        }
+        
+        .popup-bubble {
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1001;
+            display: none;
+            border: 1px solid #666;
+            transition: opacity 0.3s ease;
+        }
+        
+        .confirmation-bubble {
+            position: fixed;
+            background-color: rgba(40, 40, 40, 0.95);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 1002;
+            display: none;
+            border: 1px solid #666;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .confirmation-buttons {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .confirmation-buttons button {
+            padding: 6px 12px;
+            font-size: 12px;
+            margin: 0;
+        }
+        
+        .cancel-btn {
+            background-color: #666;
+        }
+        
+        .cancel-btn:hover {
+            background-color: #555;
+        }
+
+        /* Context Menu Styles */
+        .context-menu {
+            position: fixed;
+            background-color: rgba(40, 40, 40, 0.95);
+            color: white;
+            border: 1px solid #666;
+            border-radius: 6px;
+            padding: 8px 0;
+            z-index: 1003;
+            display: none;
+            min-width: 180px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .context-menu-item {
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #555;
+        }
+        
+        .context-menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .context-menu-item:hover {
+            background-color: #555;
+        }
+        
+        .context-menu-item:active {
+            background-color: #666;
+        }
+        
+        .copy-feedback {
+            position: fixed;
+            background-color: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1004;
+            display: none;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>H1Z1 Items Map Visualizer</h1>
+        <div class="main-layout">
+            <div class="sidebar">
+                <div class="controls">
+                    <h3>Load Data (.json file)</h3>
+                    <div class="file-input-group">
+                        <input type="file" id="fileInput" accept=".json" />
+                        <button onclick="processFile()" style="color: black;">Process Spawns</button>
+                    </div>
+                    <div id="successStatus" class="success-status"></div>
+                    <div class="file-input-group">
+                        <button id="lockBtn" class="lock-btn" onclick="toggleLock()" style="color: black;">🔓 Unlocked</button>
+                        <button onclick="resetAllPositions(event)" style="color: red; background-color: transparent; border: 2px solid red;">Reset ALL Positions</button>
+                    </div>
+                    <div id="lockStatus" class="lock-status">View is unlocked - position will reset when loading new data</div>
+                    <div class="control-group">
+                        <label for="dataScaleInput">Data Scale:</label>
+                        <input type="number" id="dataScaleInput" min="1" max="5000" step="0.1" value="100.0" oninput="updateDataScaleFromInput(this.value)">
+                        <span>%</span>
+                    </div>
+                    <div class="control-group">
+                        <label for="masterZoomInput">Master Zoom:</label>
+                        <input type="number" id="masterZoomInput" min="1" max="5000" step="1" value="100" oninput="updateMasterZoomFromInput(this.value)">
+                        <span>%</span>
+                    </div>
+                    <div id="status"></div>
+                </div>
+
+                <div class="overlay-controls">
+                    <h3>Map Overlay (square image)</h3>
+                    <div class="file-input-group">
+                        <input type="file" id="mapImageInput" accept="image/png, image/jpeg" onchange="loadMapImage()" />
+                    </div>
+                    <div id="imageStatus" class="image-status">No image loaded</div>
+                    <div class="control-group">
+                        <label for="opacitySlider">Opacity:</label>
+                        <input type="range" id="opacitySlider" min="0" max="1" step="0.05" value="0.5" oninput="updateImageOpacity(this.value)">
+                        <label for="imageScaleInput" style="margin-left: 10px;">Scale:</label>
+                        <input type="number" id="imageScaleInput" min="1" max="5000" step="0.1" value="100.0" oninput="updateImageScaleFromInput(this.value)">
+                        <span>%</span>
+                    </div>
+                    <div><small>Hint: Hold <strong>Alt key</strong> to move/zoom image.</small></div>
+                </div>
+
+                <div class="spawner-controls" id="spawnerControls" style="display: none;">
+                    <h3>Spawner Visibility</h3>
+                    <div class="toggle-buttons">
+                        <button onclick="showAllSpawners()" style="color: black;">Show All</button>
+                        <button onclick="hideAllSpawners()" style="color: black;">Hide All</button>
+                        <button onclick="excludeBattleRoyale()" style="color: black;">Exclude BattleRoyale</button>
+                    </div>
+                    <input type="text" class="search-box" id="spawnerSearch" placeholder="Search spawners..." onkeyup="filterSpawners()">
+                    <div class="spawner-grid" id="spawnerGrid"></div>
+                </div>
+            </div>
+
+            <div class="map-wrapper">
+                <div class="map-container">
+                    <canvas id="mapCanvas"></canvas>
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoom(1.2)">+</button>
+                        <button class="zoom-btn" onclick="zoom(0.8)">-</button>
+                    </div>
+                    <div class="tooltip" id="tooltip"></div>
+                </div>
+                <div class="stats" id="stats"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="popup-bubble" id="popupBubble"></div>
+    <div class="confirmation-bubble" id="confirmationBubble">
+        <div>Reset all view positions and transforms?</div>
+        <div class="confirmation-buttons">
+            <button onclick="confirmReset()">OK</button>
+            <button class="cancel-btn" onclick="cancelReset()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" onclick="copyIDs()">Copy ID(s)</div>
+        <div class="context-menu-item" onclick="copyPositionsAndIDs()">Copy Position(s) and ID</div>
+        <div class="context-menu-item" onclick="copyAdrAndIDs()">Copy ADR and ID</div>
+    </div>
+
+    <!-- Copy Feedback -->
+    <div class="copy-feedback" id="copyFeedback">Copied to clipboard!</div>
+
+    <script>
+        let mapData = null;
+        let canvas = document.getElementById('mapCanvas');
+        let ctx = canvas.getContext('2d');
+        
+        // Data transform
+        let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        // Master zoom/pan (works when locked)
+        let masterZoom = 1;
+        let masterOffsetX = 0;
+        let masterOffsetY = 0;
+
+        // Image overlay transform
+        let mapImage = null;
+        let imageOpacity = 0.5;
+        let imageScale = 1;
+        let imageOffsetX = 0;
+        let imageOffsetY = 0;
+
+        // Lock system
+        let isViewLocked = false;
+        let lockedViewState = null;
+
+        let isDragging = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let colors = {};
+        let visibleSpawners = new Set();
+
+        // Context menu state
+        let contextMenuData = null;
+        let lastRightClickEvent = null;
+
+        function resizeCanvas() {
+            const size = canvas.getBoundingClientRect().width;
+            canvas.width = size;
+            canvas.height = size;
+            renderMap();
+        }
+
+        function toggleLock() {
+            isViewLocked = !isViewLocked;
+            const lockBtn = document.getElementById('lockBtn');
+            const lockStatus = document.getElementById('lockStatus');
+            
+            if (isViewLocked) {
+                lockedViewState = {
+                    scale: scale,
+                    offsetX: offsetX,
+                    offsetY: offsetY,
+                    imageScale: imageScale,
+                    imageOffsetX: imageOffsetX,
+                    imageOffsetY: imageOffsetY,
+                    masterZoom: masterZoom,
+                    masterOffsetX: masterOffsetX,
+                    masterOffsetY: masterOffsetY
+                };
+                lockBtn.textContent = '🔒 Locked View';
+                lockBtn.classList.add('locked');
+                lockStatus.textContent = 'View is locked - use Master Zoom for detailed inspection';
+                lockStatus.classList.add('locked');
+                canvas.classList.add('locked-view');
+            } else {
+                // Don't reset master zoom when unlocking - keep current values
+                lockedViewState = null;
+                lockBtn.textContent = '🔓 Unlocked';
+                lockBtn.classList.remove('locked');
+                lockStatus.textContent = 'View is unlocked - position will reset when loading new data';
+                lockStatus.classList.remove('locked');
+                canvas.classList.remove('locked-view');
+            }
+            renderMap();
+        }
+
+        function applyLockedViewState() {
+            if (isViewLocked && lockedViewState) {
+                scale = lockedViewState.scale;
+                offsetX = lockedViewState.offsetX;
+                offsetY = lockedViewState.offsetY;
+                imageScale = lockedViewState.imageScale;
+                imageOffsetX = lockedViewState.imageOffsetX;
+                imageOffsetY = lockedViewState.imageOffsetY;
+                masterZoom = lockedViewState.masterZoom;
+                masterOffsetX = lockedViewState.masterOffsetX;
+                masterOffsetY = lockedViewState.masterOffsetY;
+                
+                document.getElementById('imageScaleInput').value = (imageScale * 100).toFixed(1);
+                document.getElementById('dataScaleInput').value = (scale * 100).toFixed(1);
+                document.getElementById('masterZoomInput').value = (masterZoom * 100).toFixed(0);
+            }
+        }
+
+        function updateMasterZoomFromInput(value) {
+            const percentage = parseFloat(value);
+            if (isNaN(percentage) || percentage <= 0) return;
+            masterZoom = percentage / 100.0;
+            masterZoom = Math.max(0.1, Math.min(50, masterZoom)); // Cap at 50x
+            renderMap();
+        }
+
+        function generateColor(index) {
+            const hue = (index * 137.508) % 360;
+            return `hsl(${hue}, 70%, 60%)`;
+        }
+
+        function updateProgress(percentage) {
+            const progressBar = document.getElementById('progressBar');
+            const progressContainer = document.getElementById('progressContainer');
+            progressContainer.style.display = 'block';
+            progressBar.style.width = percentage + '%';
+            if (percentage >= 100) setTimeout(() => { progressContainer.style.display = 'none'; }, 1000);
+        }
+
+        function updateStatus(message) { document.getElementById('status').textContent = message; }
+
+        function updateDataScaleFromInput(value) {
+            const percentage = parseFloat(value);
+            if (isNaN(percentage) || percentage <= 0) return;
+            scale = percentage / 100.0;
+            renderMap();
+        }
+
+        function showPopupBubble(x, y, message, duration = 2000) {
+            const bubble = document.getElementById('popupBubble');
+            bubble.textContent = message;
+            bubble.style.left = x + 'px';
+            bubble.style.top = y + 'px';
+            bubble.style.display = 'block';
+            bubble.style.opacity = '1';
+            
+            setTimeout(() => {
+                bubble.style.opacity = '0';
+                setTimeout(() => {
+                    bubble.style.display = 'none';
+                }, 300);
+            }, duration);
+        }
+
+        function showCopyFeedback(x, y) {
+            const feedback = document.getElementById('copyFeedback');
+            feedback.style.left = x + 'px';
+            feedback.style.top = y + 'px';
+            feedback.style.display = 'block';
+            
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 1500);
+        }
+
+        function showConfirmationBubble(x, y) {
+            const bubble = document.getElementById('confirmationBubble');
+            bubble.style.left = x + 'px';
+            bubble.style.top = y + 'px';
+            bubble.style.display = 'block';
+            
+            // Add click outside to cancel
+            setTimeout(() => {
+                document.addEventListener('click', handleClickOutsideConfirmation, true);
+            }, 0);
+        }
+
+        function hideConfirmationBubble() {
+            const bubble = document.getElementById('confirmationBubble');
+            bubble.style.display = 'none';
+            document.removeEventListener('click', handleClickOutsideConfirmation, true);
+        }
+
+        function handleClickOutsideConfirmation(e) {
+            const bubble = document.getElementById('confirmationBubble');
+            if (!bubble.contains(e.target)) {
+                e.preventDefault();
+                e.stopPropagation();
+                cancelReset();
+            }
+        }
+
+        function resetAllPositions(e) {
+            if (isViewLocked) {
+                // Show "Positions are locked" bubble at mouse position
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                showPopupBubble(mouseX + 10, mouseY - 30, "Positions are locked");
+                return;
+            }
+            
+            // Show confirmation bubble at mouse click position
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            showConfirmationBubble(mouseX - 100, mouseY - 50);
+        }
+
+        function confirmReset() {
+            hideConfirmationBubble();
+            resetView();
+        }
+
+        function cancelReset() {
+            hideConfirmationBubble();
+        }
+
+        // Context Menu Functions
+        function showContextMenu(e, nearbyPoints) {
+            hideContextMenu();
+            
+            contextMenuData = nearbyPoints;
+            lastRightClickEvent = e;
+            
+            const contextMenu = document.getElementById('contextMenu');
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.style.display = 'block';
+            
+            // Adjust if menu would go off-screen
+            const menuRect = contextMenu.getBoundingClientRect();
+            if (menuRect.right > window.innerWidth) {
+                contextMenu.style.left = (e.clientX - menuRect.width) + 'px';
+            }
+            if (menuRect.bottom > window.innerHeight) {
+                contextMenu.style.top = (e.clientY - menuRect.height) + 'px';
+            }
+            
+            // Add click outside to hide
+            setTimeout(() => {
+                document.addEventListener('click', handleClickOutsideContextMenu, true);
+            }, 0);
+        }
+
+        function hideContextMenu() {
+            const contextMenu = document.getElementById('contextMenu');
+            contextMenu.style.display = 'none';
+            document.removeEventListener('click', handleClickOutsideContextMenu, true);
+        }
+
+        function handleClickOutsideContextMenu(e) {
+            const contextMenu = document.getElementById('contextMenu');
+            if (!contextMenu.contains(e.target)) {
+                e.preventDefault();
+                e.stopPropagation();
+                hideContextMenu();
+            }
+        }
+
+        function copyIDs() {
+            if (!contextMenuData || !mapData) return;
+            
+            const ids = contextMenuData.map(pos => pos.id.toString()).join('\n');
+            navigator.clipboard.writeText(ids).then(() => {
+                showCopyFeedback(lastRightClickEvent.clientX, lastRightClickEvent.clientY - 30);
+            });
+            hideContextMenu();
+        }
+
+        function copyPositionsAndIDs() {
+            if (!contextMenuData || !mapData) return;
+            
+            const lines = contextMenuData.map(pos => {
+                // Get the original spawner data to access the full position array
+                const spawnerType = mapData.spawnerTypes[pos.type];
+                if (spawnerType) {
+                    const instance = spawnerType.instances.find(inst => inst.id === pos.id);
+                    if (instance && instance.originalData) {
+                        const positionArray = JSON.stringify(instance.originalData.position);
+                        return `"position": ${positionArray},\n"id": ${pos.id}`;
+                    }
+                }
+                // Fallback if original data not available
+                return `"position": [${-pos.z}, 0, ${pos.x}, 1],\n"id": ${pos.id}`;
+            }).join('\n\n');
+            
+            navigator.clipboard.writeText(lines).then(() => {
+                showCopyFeedback(lastRightClickEvent.clientX, lastRightClickEvent.clientY - 30);
+            });
+            hideContextMenu();
+        }
+
+        function copyAdrAndIDs() {
+            if (!contextMenuData || !mapData) return;
+            
+            // Group by type and get the ADR for each
+            const typeGroups = {};
+            contextMenuData.forEach(pos => {
+                if (!typeGroups[pos.type]) {
+                    typeGroups[pos.type] = [];
+                }
+                typeGroups[pos.type].push(pos.id);
+            });
+            
+            const lines = [];
+            for (const type in typeGroups) {
+                const adr = type + '.adr'; // Add the .adr extension
+                const ids = typeGroups[type];
+                lines.push(`"${adr}": [${ids.join(', ')}]`);
+            }
+            
+            const result = lines.join('\n');
+            navigator.clipboard.writeText(result).then(() => {
+                showCopyFeedback(lastRightClickEvent.clientX, lastRightClickEvent.clientY - 30);
+            });
+            hideContextMenu();
+        }
+
+        async function processFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) { alert('Please select a file first'); return; }
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                const spawnerTypes = {};
+                const allPositions = [];
+                let totalItems = 0;
+                for (const spawner of data) {
+                    const type = spawner.actorDefinition.replace('.adr', '');
+                    if (!spawnerTypes[type]) {
+                        spawnerTypes[type] = { name: type, instances: [], count: 0 };
+                    }
+                    for (const instance of spawner.instances) {
+                        const originalX = instance.position[0];
+                        const originalZ = instance.position[2];
+                        const pos = { 
+                            x: originalZ, 
+                            z: -originalX,
+                            type: type, 
+                            id: instance.id,
+                            originalData: instance // Store original instance data for copying
+                        };
+                        spawnerTypes[type].instances.push(pos);
+                        allPositions.push(pos);
+                        totalItems++;
+                    }
+                    spawnerTypes[type].count = spawner.instances.length;
+                }
+                const bounds = {
+                    minX: Math.min(...allPositions.map(p => p.x)), maxX: Math.max(...allPositions.map(p => p.x)),
+                    minZ: Math.min(...allPositions.map(p => p.z)), maxZ: Math.max(...allPositions.map(p => p.z))
+                };
+                let typeIndex = 0;
+                for (const type in spawnerTypes) {
+                    colors[type] = generateColor(typeIndex++);
+                    visibleSpawners.add(type);
+                }
+                mapData = { spawnerTypes, allPositions, bounds, totalItems };
+                
+                if (!isViewLocked) {
+                    scale = 1;
+                    offsetX = 0;
+                    offsetY = 0;
+                    // Don't reset master zoom when loading new data if view was unlocked
+                    document.getElementById('dataScaleInput').value = "100.0";
+                }
+                
+                resizeCanvas();
+                applyLockedViewState();
+                
+                updateStats();
+                updateSpawnerControls();
+                document.getElementById('spawnerControls').style.display = 'block';
+                
+                // Show success message in the new location
+                const successStatus = document.getElementById('successStatus');
+                successStatus.textContent = `Successfully processed ${totalItems} items across ${Object.keys(spawnerTypes).length} spawner types`;
+                successStatus.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function loadMapImage() {
+            const fileInput = document.getElementById('mapImageInput');
+            const file = fileInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                mapImage = new Image();
+                mapImage.onload = function() {
+                    const imageStatus = document.getElementById('imageStatus');
+                    imageStatus.textContent = `Map image loaded: ${mapImage.width}x${mapImage.height}`;
+                    imageStatus.classList.add('loaded');
+                    if (!isViewLocked) {
+                        resetImageTransform();
+                    } else {
+                        applyLockedViewState();
+                    }
+                    renderMap();
+                }
+                mapImage.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function updateImageOpacity(value) {
+            imageOpacity = parseFloat(value);
+            renderMap();
+        }
+
+        function updateImageScaleFromInput(value) {
+            const percentage = parseFloat(value);
+            if (isNaN(percentage) || percentage <= 0) return;
+            imageScale = percentage / 100.0;
+            renderMap();
+        }
+
+        function resetImageTransform() {
+            imageScale = 1;
+            imageOffsetX = 0;
+            imageOffsetY = 0;
+            document.getElementById('imageScaleInput').value = "100.0";
+            if(mapImage) renderMap();
+        }
+
+        function resetView() {
+            scale = 1;
+            offsetX = 0;
+            offsetY = 0;
+            masterZoom = 1;
+            masterOffsetX = 0;
+            masterOffsetY = 0;
+            document.getElementById('dataScaleInput').value = "100.0";
+            document.getElementById('masterZoomInput').value = "100";
+            resetImageTransform();
+            renderMap();
+        }
+
+        function renderMap() {
+            if (!mapData || !canvas.width) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Always apply master zoom transform (whether locked or unlocked)
+            ctx.save();
+            ctx.translate(canvas.width/2, canvas.height/2);
+            ctx.scale(masterZoom, masterZoom);
+            ctx.translate(-canvas.width/2 + masterOffsetX, -canvas.height/2 + masterOffsetY);
+
+            if (mapImage) {
+                ctx.globalAlpha = imageOpacity;
+                const imgWidth = mapImage.width * imageScale;
+                const imgHeight = mapImage.height * imageScale;
+                ctx.drawImage(mapImage, imageOffsetX, imageOffsetY, imgWidth, imgHeight);
+                ctx.globalAlpha = 1.0;
+            }
+
+            const { bounds, allPositions } = mapData;
+            const margin = 50;
+            const mapWidth = canvas.width - 2 * margin;
+            const mapHeight = canvas.height - 2 * margin;
+            const scaleX = mapWidth / (bounds.maxX - bounds.minX);
+            const scaleZ = mapHeight / (bounds.maxZ - bounds.minZ);
+            const mapScale = Math.min(scaleX, scaleZ) * scale;
+            const centerX = (bounds.minX + bounds.maxX) / 2;
+            const centerZ = (bounds.minZ + bounds.maxZ) / 2;
+            const canvasCenterX = canvas.width / 2;
+            const canvasCenterZ = canvas.height / 2;
+
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            const gridSize = 1000;
+            for (let x = Math.floor(bounds.minX / gridSize) * gridSize; x <= bounds.maxX; x += gridSize) {
+                const screenX = (x - centerX) * mapScale + canvasCenterX + offsetX;
+                ctx.beginPath(); ctx.moveTo(screenX, 0); ctx.lineTo(screenX, canvas.height); ctx.stroke();
+            }
+            for (let z = Math.floor(bounds.minZ / gridSize) * gridSize; z <= bounds.maxZ; z += gridSize) {
+                const screenZ = (z - centerZ) * mapScale + canvasCenterZ + offsetY;
+                ctx.beginPath(); ctx.moveTo(0, screenZ); ctx.lineTo(canvas.width, screenZ); ctx.stroke();
+            }
+
+            for (const pos of allPositions) {
+                if (!visibleSpawners.has(pos.type)) continue;
+                const screenX = (pos.x - centerX) * mapScale + canvasCenterX + offsetX;
+                const screenZ = (pos.z - centerZ) * mapScale + canvasCenterZ + offsetY;
+                if (screenX < -10 || screenX > canvas.width + 10 || screenZ < -10 || screenZ > canvas.height + 10) continue;
+                ctx.fillStyle = colors[pos.type];
+                ctx.beginPath();
+                // Scale dot size inversely with master zoom (smaller when zoomed in)
+                const dotSize = Math.max(0.1, 2 / masterZoom);
+                ctx.arc(screenX, screenZ, dotSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore(); // Restore transform
+        }
+        
+        function updateStats() { 
+            if (!mapData) return; 
+            const { spawnerTypes, totalItems } = mapData; 
+            const statsContainer = document.getElementById('stats'); 
+            let visibleItems = 0; 
+            let visibleTypes = 0; 
+            for (const type in spawnerTypes) { 
+                if (visibleSpawners.has(type)) { 
+                    visibleItems += spawnerTypes[type].count; 
+                    visibleTypes++; 
+                } 
+            } 
+            statsContainer.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-value">${visibleItems}</div>
+                    <div class="stat-label">Visible Items</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${totalItems}</div>
+                    <div class="stat-label">Total Items</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${visibleTypes}</div>
+                    <div class="stat-label">Visible Types</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${Object.keys(spawnerTypes).length}</div>
+                    <div class="stat-label">Total Types</div>
+                </div>
+            `; 
+        }
+        
+        function updateSpawnerControls() { 
+            if (!mapData) return; 
+            const { spawnerTypes } = mapData; 
+            const spawnerGrid = document.getElementById('spawnerGrid'); 
+            const sortedTypes = Object.values(spawnerTypes).sort((a, b) => b.count - a.count); 
+            spawnerGrid.innerHTML = sortedTypes.map(type => `
+                <div class="spawner-item" data-spawner="${type.name}">
+                    <input type="checkbox" class="spawner-checkbox" id="spawner-${type.name}" ${visibleSpawners.has(type.name) ? 'checked' : ''} onchange="toggleSpawner('${type.name}')">
+                    <div class="spawner-color" style="background-color: ${colors[type.name]}"></div>
+                    <label class="spawner-label" for="spawner-${type.name}">${type.name} <span class="spawner-count">(${type.count})</span></label>
+                </div>
+            `).join('');
+        }
+        
+        function zoom(factor) { 
+            if (isViewLocked) {
+                // Master zoom when locked
+                masterZoom *= factor;
+                masterZoom = Math.max(0.1, Math.min(50, masterZoom)); // Cap at 50x
+                document.getElementById('masterZoomInput').value = (masterZoom * 100).toFixed(0);
+            } else {
+                // Regular zoom when unlocked
+                scale *= factor; 
+                scale = Math.max(0.1, Math.min(20, scale)); 
+                document.getElementById('dataScaleInput').value = (scale * 100).toFixed(1);
+            }
+            renderMap(); 
+        }
+        
+        canvas.addEventListener('mousedown', (e) => { 
+            isDragging = true; 
+            lastMouseX = e.clientX; 
+            lastMouseY = e.clientY; 
+        });
+        
+        canvas.addEventListener('mousemove', (e) => { 
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            if (isDragging) { 
+                const deltaX = e.clientX - lastMouseX; 
+                const deltaY = e.clientY - lastMouseY; 
+                
+                if (!isViewLocked && e.altKey) { 
+                    // Image manipulation only when unlocked
+                    imageOffsetX += deltaX; 
+                    imageOffsetY += deltaY; 
+                } else if (isViewLocked) {
+                    // Master pan when locked (adjust for zoom)
+                    masterOffsetX += deltaX / masterZoom;
+                    masterOffsetY += deltaY / masterZoom;
+                } else { 
+                    // Data pan when unlocked (adjust for zoom)
+                    offsetX += deltaX / masterZoom; 
+                    offsetY += deltaY / masterZoom; 
+                }
+                
+                lastMouseX = e.clientX; 
+                lastMouseY = e.clientY; 
+                renderMap(); 
+            }
+            
+            // Show tooltip in all cases
+            showTooltip(e);
+        });
+        
+        canvas.addEventListener('mouseup', () => { isDragging = false; });
+        canvas.addEventListener('mouseleave', () => { isDragging = false; hideTooltip(); });
+        
+        canvas.addEventListener('click', (e) => {
+            if (!mapData) return;
+            
+            // Find nearby points for context menu
+            const nearbyPoints = getNearbyPoints(e);
+            if (nearbyPoints.length > 0) {
+                showContextMenu(e, nearbyPoints);
+            }
+        });
+        
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            // Allow normal right-click functionality - do nothing special
+        });
+        
+        canvas.addEventListener('wheel', (e) => { 
+            e.preventDefault(); 
+            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            
+            if (!isViewLocked && e.altKey) { 
+                // Image zoom only when unlocked
+                imageScale *= zoomFactor; 
+                imageScale = Math.max(0.01, imageScale); 
+                document.getElementById('imageScaleInput').value = (imageScale * 100).toFixed(1); 
+            } else if (isViewLocked) {
+                // Master zoom when locked - zoom toward mouse position
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                const worldMouseX = (mouseX - canvas.width/2) / masterZoom + canvas.width/2 - masterOffsetX;
+                const worldMouseY = (mouseY - canvas.height/2) / masterZoom + canvas.height/2 - masterOffsetY;
+                
+                masterZoom *= zoomFactor;
+                masterZoom = Math.max(0.1, Math.min(50, masterZoom));
+                
+                masterOffsetX = (mouseX - canvas.width/2) / masterZoom + canvas.width/2 - worldMouseX;
+                masterOffsetY = (mouseY - canvas.height/2) / masterZoom + canvas.width/2 - worldMouseY;
+                
+                document.getElementById('masterZoomInput').value = (masterZoom * 100).toFixed(0);
+            } else { 
+                // Data zoom when unlocked
+                zoom(zoomFactor); 
+            } 
+            renderMap();
+        });
+
+        function getNearbyPoints(e) {
+            const rect = canvas.getBoundingClientRect(); 
+            const mouseX = e.clientX - rect.left; 
+            const mouseY = e.clientY - rect.top; 
+            
+            // Transform mouse coordinates back through the master zoom transform
+            const worldMouseX = (mouseX - canvas.width/2) / masterZoom + canvas.width/2 - masterOffsetX;
+            const worldMouseY = (mouseY - canvas.height/2) / masterZoom + canvas.height/2 - masterOffsetY;
+            
+            const { bounds, allPositions } = mapData; 
+            const margin = 50; 
+            const mapWidth = canvas.width - 2 * margin; 
+            const mapHeight = canvas.height - 2 * margin; 
+            const scaleX = mapWidth / (bounds.maxX - bounds.minX); 
+            const scaleZ = mapHeight / (bounds.maxZ - bounds.minZ); 
+            const mapScale = Math.min(scaleX, scaleZ) * scale; 
+            const centerX = (bounds.minX + bounds.maxX) / 2; 
+            const centerZ = (bounds.minZ + bounds.maxZ) / 2; 
+            const canvasCenterX = canvas.width / 2; 
+            const canvasCenterZ = canvas.height / 2; 
+            
+            const nearbyPoints = [];
+            const detectionRadius = 10 / masterZoom;
+            
+            for (const pos of allPositions) {
+                if (!visibleSpawners.has(pos.type)) continue;
+                
+                const worldScreenX = (pos.x - centerX) * mapScale + canvasCenterX + offsetX;
+                const worldScreenZ = (pos.z - centerZ) * mapScale + canvasCenterZ + offsetY;
+                
+                const distance = Math.sqrt((worldMouseX - worldScreenX) ** 2 + (worldMouseY - worldScreenZ) ** 2);
+                if (distance < detectionRadius) {
+                    nearbyPoints.push(pos);
+                }
+            }
+            
+            return nearbyPoints;
+        }
+        
+        function showTooltip(e) { 
+            if (!mapData || isDragging) return; 
+            
+            const tooltip = document.getElementById('tooltip');
+            const nearbyPoints = getNearbyPoints(e);
+            
+            if (nearbyPoints.length > 0) {
+                const typeCounts = {};
+                nearbyPoints.forEach(pos => {
+                    if (!typeCounts[pos.type]) {
+                        typeCounts[pos.type] = 0;
+                    }
+                    typeCounts[pos.type]++;
+                });
+                
+                let tooltipContent = '';
+                for (const type in typeCounts) {
+                    const count = typeCounts[type];
+                    tooltipContent += `
+                        <div class="tooltip-item">
+                            <div class="tooltip-color" style="background-color: ${colors[type]}"></div>
+                            ${type} (${count} ${count === 1 ? 'item' : 'items'})
+                        </div>
+                    `;
+                }
+                
+                if (nearbyPoints.length === 1) {
+                    const pos = nearbyPoints[0];
+                    tooltipContent += `
+                        <div style="margin-top: 6px; font-size: 11px; color: #aaa;">
+                            Position: (${pos.x.toFixed(0)}, ${pos.z.toFixed(0)})<br>
+                            ID: ${pos.id}
+                        </div>
+                    `;
+                }
+                
+                tooltip.innerHTML = tooltipContent;
+                tooltip.style.left = (e.clientX + 5) + 'px';
+                tooltip.style.top = e.clientY + 'px';
+                tooltip.style.display = 'block';
+                
+                // Adjust if tooltip would go off-screen
+                const tooltipRect = tooltip.getBoundingClientRect();
+                if (tooltipRect.right > window.innerWidth) {
+                    tooltip.style.left = (e.clientX - tooltipRect.width - 5) + 'px';
+                }
+                if (tooltipRect.bottom > window.innerHeight) {
+                    tooltip.style.top = (e.clientY - tooltipRect.height) + 'px';
+                }
+            } else {
+                hideTooltip();
+            }
+        }
+        
+        function hideTooltip() { 
+            document.getElementById('tooltip').style.display = 'none'; 
+        }
+        
+        function toggleSpawner(spawnerName) { 
+            if (visibleSpawners.has(spawnerName)) { 
+                visibleSpawners.delete(spawnerName); 
+            } else { 
+                visibleSpawners.add(spawnerName); 
+            } 
+            renderMap(); 
+            updateStats(); 
+        }
+        
+        function showAllSpawners() { 
+            if (!mapData) return; 
+            const { spawnerTypes } = mapData; 
+            visibleSpawners.clear(); 
+            for (const type in spawnerTypes) { 
+                visibleSpawners.add(type); 
+            } 
+            const checkboxes = document.querySelectorAll('.spawner-checkbox'); 
+            checkboxes.forEach(cb => cb.checked = true); 
+            renderMap(); 
+            updateStats(); 
+        }
+        
+        function hideAllSpawners() { 
+            visibleSpawners.clear(); 
+            const checkboxes = document.querySelectorAll('.spawner-checkbox'); 
+            checkboxes.forEach(cb => cb.checked = false); 
+            renderMap(); 
+            updateStats(); 
+        }
+        
+        function excludeBattleRoyale() { 
+            if (!mapData) return; 
+            const { spawnerTypes } = mapData; 
+            visibleSpawners.clear(); 
+            for (const type in spawnerTypes) { 
+                // Show all spawners except those with "BattleRoyale" in their name
+                if (!type.toLowerCase().includes('battleroyale')) {
+                    visibleSpawners.add(type); 
+                }
+            } 
+            const checkboxes = document.querySelectorAll('.spawner-checkbox'); 
+            checkboxes.forEach(cb => { 
+                const spawnerType = cb.id.replace('spawner-', '');
+                cb.checked = !spawnerType.toLowerCase().includes('battleroyale');
+            }); 
+            renderMap(); 
+            updateStats(); 
+        }
+        
+        function filterSpawners() { 
+            const searchTerm = document.getElementById('spawnerSearch').value.toLowerCase(); 
+            const spawnerItems = document.querySelectorAll('.spawner-item'); 
+            spawnerItems.forEach(item => { 
+                const spawnerName = item.dataset.spawner.toLowerCase(); 
+                if (spawnerName.includes(searchTerm)) { 
+                    item.style.display = 'flex'; 
+                } else { 
+                    item.style.display = 'none'; 
+                } 
+            }); 
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+    </script>
+</body>
+</html>
