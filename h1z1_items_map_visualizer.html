@@ -33,27 +33,23 @@
         button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
         button:hover { background-color: #45a049; }
         button:disabled { background-color: #666; cursor: not-allowed; }
-        .map-container { background-color: #2a2a2a; border-radius: 8px; padding: 20px; position: relative; }
+        .map-container { background-color: #2a2a2a; border-radius: 8px; padding: 20px; position: relative; overflow: hidden; }
         
         canvas { 
             border: 1px solid #444; 
             background-color: #000; 
-            cursor: grab;
+            cursor: crosshair;
             width: 100%;
             height: auto;
             aspect-ratio: 1 / 1;
-        }
-        canvas:active {
-            cursor: grabbing;
+            display: block;
         }
 
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
         .stat-item { background-color: #333; padding: 10px; border-radius: 4px; text-align: center; }
         .stat-value { font-size: 24px; font-weight: bold; color: #4CAF50; }
         .stat-label { font-size: 12px; color: #ccc; }
-        .progress { width: 100%; height: 20px; background-color: #333; border-radius: 10px; overflow: hidden; margin: 10px 0; }
-        .progress-bar { height: 100%; background-color: #4CAF50; transition: width 0.3s ease; }
-        .zoom-controls { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 10; }
+        .zoom-controls { position: absolute; top: 30px; right: 30px; display: flex; flex-direction: column; gap: 5px; z-index: 10; }
         .zoom-btn { width: 30px; height: 30px; padding: 0; font-size: 18px; display: flex; align-items: center; justify-content: center; }
         .tooltip { 
             position: fixed; 
@@ -91,152 +87,54 @@
         .control-group { margin-top: 8px; display: flex; align-items: center; gap: 10px; }
         input[type="number"] { width: 80px; padding: 8px; background-color: #333; border: 1px solid #555; border-radius: 4px; color: #fff; }
         
-        .lock-btn {
-            background-color: #ff9800;
-            position: relative;
-        }
-        .lock-btn:hover {
-            background-color: #f57c00;
-        }
-        .lock-btn.locked {
-            background-color: #f44336;
-        }
-        .lock-btn.locked:hover {
-            background-color: #d32f2f;
-        }
-        .lock-status {
-            margin-top: 10px;
-            padding: 8px;
-            background-color: #333;
-            border-radius: 4px;
-            font-size: 12px;
-            color: #ccc;
-        }
-        .lock-status.locked {
-            background-color: #4a2c2a;
-            color: #ffcdd2;
-        }
-        .image-status {
-            margin-bottom: 6px;
-            padding: 8px;
-            background-color: #333;
-            border-radius: 4px;
-            font-size: 11px;
-            color: #ccc;
-        }
-        .image-status.loaded {
-            background-color: #2e4a2e;
-            color: #90ee90;
-            border: 1px solid #4a6b4a;
-        }
-        .locked-view {
-            cursor: crosshair !important;
-        }
+        .lock-btn { background-color: #ff9800; position: relative; }
+        .lock-btn:hover { background-color: #f57c00; }
+        .lock-btn.locked { background-color: #f44336; }
+        .lock-btn.locked:hover { background-color: #d32f2f; }
+        .lock-status { margin-top: 10px; padding: 8px; background-color: #333; border-radius: 4px; font-size: 12px; color: #ccc; }
+        .lock-status.locked { background-color: #4a2c2a; color: #ffcdd2; }
+        .image-status { margin-bottom: 6px; padding: 8px; background-color: #333; border-radius: 4px; font-size: 11px; color: #ccc; }
+        .image-status.loaded { background-color: #2e4a2e; color: #90ee90; border: 1px solid #4a6b4a; }
+        .locked-view { cursor: default !important; }
         
         .success-status {
-            margin-bottom: 6px;
-            padding: 8px;
-            background-color: #2e4a2e;
-            border-radius: 4px;
-            font-size: 11px;
-            color: #90ee90;
-            border: 1px solid #4a6b4a;
-            display: none;
+            margin-bottom: 6px; padding: 8px; background-color: #2e4a2e;
+            border-radius: 4px; font-size: 11px; color: #90ee90;
+            border: 1px solid #4a6b4a; display: none;
         }
         
         .popup-bubble {
-            position: fixed;
-            background-color: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-size: 12px;
-            pointer-events: none;
-            z-index: 1001;
-            display: none;
-            border: 1px solid #666;
-            transition: opacity 0.3s ease;
+            position: fixed; background-color: rgba(0, 0, 0, 0.9); color: white;
+            padding: 10px 15px; border-radius: 6px; font-size: 12px;
+            pointer-events: none; z-index: 1001; display: none;
+            border: 1px solid #666; transition: opacity 0.3s ease;
         }
         
         .confirmation-bubble {
-            position: fixed;
-            background-color: rgba(40, 40, 40, 0.95);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 13px;
-            z-index: 1002;
-            display: none;
-            border: 1px solid #666;
-            min-width: 200px;
-            text-align: center;
+            position: fixed; background-color: rgba(40, 40, 40, 0.95); color: white;
+            padding: 15px; border-radius: 8px; font-size: 13px; z-index: 1002;
+            display: none; border: 1px solid #666; min-width: 200px; text-align: center;
         }
-        
-        .confirmation-buttons {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        
-        .confirmation-buttons button {
-            padding: 6px 12px;
-            font-size: 12px;
-            margin: 0;
-        }
-        
-        .cancel-btn {
-            background-color: #666;
-        }
-        
-        .cancel-btn:hover {
-            background-color: #555;
-        }
+        .confirmation-buttons { margin-top: 10px; display: flex; gap: 10px; justify-content: center; }
+        .confirmation-buttons button { padding: 6px 12px; font-size: 12px; margin: 0; }
+        .cancel-btn { background-color: #666; }
+        .cancel-btn:hover { background-color: #555; }
 
-        /* Context Menu Styles */
         .context-menu {
-            position: fixed;
-            background-color: rgba(40, 40, 40, 0.95);
-            color: white;
-            border: 1px solid #666;
-            border-radius: 6px;
-            padding: 8px 0;
-            z-index: 1003;
-            display: none;
-            min-width: 180px;
+            position: fixed; background-color: rgba(40, 40, 40, 0.95); color: white;
+            border: 1px solid #666; border-radius: 6px; padding: 8px 0;
+            z-index: 1003; display: none; min-width: 180px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         }
-        
-        .context-menu-item {
-            padding: 8px 16px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            border-bottom: 1px solid #555;
-        }
-        
-        .context-menu-item:last-child {
-            border-bottom: none;
-        }
-        
-        .context-menu-item:hover {
-            background-color: #555;
-        }
-        
-        .context-menu-item:active {
-            background-color: #666;
-        }
+        .context-menu-item { padding: 8px 16px; font-size: 13px; cursor: pointer; transition: background-color 0.2s ease; border-bottom: 1px solid #555; }
+        .context-menu-item:last-child { border-bottom: none; }
+        .context-menu-item:hover { background-color: #555; }
+        .context-menu-item:active { background-color: #666; }
         
         .copy-feedback {
-            position: fixed;
-            background-color: rgba(76, 175, 80, 0.9);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            z-index: 1004;
-            display: none;
-            pointer-events: none;
+            position: fixed; background-color: rgba(76, 175, 80, 0.9); color: white;
+            padding: 8px 12px; border-radius: 4px; font-size: 12px;
+            z-index: 1004; display: none; pointer-events: none;
         }
     </style>
 </head>
@@ -256,7 +154,7 @@
                         <button id="lockBtn" class="lock-btn" onclick="toggleLock()" style="color: black;">🔓 Unlocked</button>
                         <button onclick="resetAllPositions(event)" style="color: red; background-color: transparent; border: 2px solid red;">Reset ALL Positions</button>
                     </div>
-                    <div id="lockStatus" class="lock-status">View is UNLOCKED. Drag to pan the map.</div>
+                    <div id="lockStatus" class="lock-status">View is unlocked - position will reset when loading new data</div>
                     <div class="control-group">
                         <label for="dataScaleInput">Data Scale:</label>
                         <input type="number" id="dataScaleInput" min="1" max="5000" step="0.1" value="100.0" oninput="updateDataScaleFromInput(this.value)">
@@ -283,7 +181,7 @@
                         <input type="number" id="imageScaleInput" min="1" max="5000" step="0.1" value="100.0" oninput="updateImageScaleFromInput(this.value)">
                         <span>%</span>
                     </div>
-                    <div><small>Hint: Hold <strong>Alt key</strong> while dragging to pan. This works in both Locked and Unlocked views.</small></div>
+                    <div><small>Hint: Hold <strong>Alt key</strong> to move/zoom image.</small></div>
                 </div>
 
                 <div class="spawner-controls" id="spawnerControls" style="display: none;">
@@ -332,675 +230,565 @@
     <div class="copy-feedback" id="copyFeedback">Copied to clipboard!</div>
 
     <script>
-        let mapData = null;
-        let canvas = document.getElementById('mapCanvas');
-        let ctx = canvas.getContext('2d');
-        
-        // Data transform
-        let scale = 1;
-        let offsetX = 0;
-        let offsetY = 0;
+    let mapData = null;
+    let canvas = document.getElementById('mapCanvas');
+    let ctx = canvas.getContext('2d');
+    
+    let scale = 1, offsetX = 0, offsetY = 0;
+    let masterZoom = 1, masterOffsetX = 0, masterOffsetY = 0;
+    let mapImage = null, imageOpacity = 0.5, imageScale = 1, imageOffsetX = 0, imageOffsetY = 0;
+    let isViewLocked = false, lockedViewState = null;
+    
+    let isDragging = false, isPanning = false, isSelecting = false;
+    let lastMouseX = 0, lastMouseY = 0;
+    let colors = {}, visibleSpawners = new Set();
+    let contextMenuData = null, lastRightClickEvent = null;
+    let selectionRect = null, selectedPoints = [];
 
-        // Master zoom/pan
-        let masterZoom = 1;
-        let masterOffsetX = 0;
-        let masterOffsetY = 0;
+    function resizeCanvas() {
+        const size = canvas.getBoundingClientRect().width;
+        if (size > 0) { canvas.width = size; canvas.height = size; renderMap(); }
+    }
 
-        // Image overlay transform
-        let mapImage = null;
-        let imageOpacity = 0.5;
-        let imageScale = 1;
-        let imageOffsetX = 0;
-        let imageOffsetY = 0;
+    function toggleLock() {
+        isViewLocked = !isViewLocked;
+        const lockBtn = document.getElementById('lockBtn');
+        const lockStatus = document.getElementById('lockStatus');
+        if (isViewLocked) {
+            lockedViewState = { scale, offsetX, offsetY, imageScale, imageOffsetX, imageOffsetY, masterZoom, masterOffsetX, masterOffsetY };
+            lockBtn.textContent = '🔒 Locked View';
+            lockBtn.classList.add('locked');
+            lockStatus.textContent = 'View is locked. Left-drag to select. Alt+Left-drag to pan.';
+            lockStatus.classList.add('locked');
+            canvas.classList.add('locked-view');
+        } else {
+            lockedViewState = null;
+            lockBtn.textContent = '🔓 Unlocked';
+            lockBtn.classList.remove('locked');
+            lockStatus.textContent = 'View is unlocked - position will reset when loading new data';
+            lockStatus.classList.remove('locked');
+            canvas.classList.remove('locked-view');
+        }
+        renderMap();
+    }
 
-        // Lock system
-        let isViewLocked = false;
-        let lockedViewState = null;
+    function applyLockedViewState() {
+        if (isViewLocked && lockedViewState) {
+            ({ scale, offsetX, offsetY, imageScale, imageOffsetX, imageOffsetY, masterZoom, masterOffsetX, masterOffsetY } = lockedViewState);
+            document.getElementById('imageScaleInput').value = (imageScale * 100).toFixed(1);
+            document.getElementById('dataScaleInput').value = (scale * 100).toFixed(1);
+            document.getElementById('masterZoomInput').value = (masterZoom * 100).toFixed(0);
+        }
+    }
 
-        // Interaction State
-        let isMouseDown = false;
-        let isDragging = false;
-        let isSelecting = false;
-        let dragStartPoint = { x: 0, y: 0 };
-        let lastMouseX = 0;
-        let lastMouseY = 0;
-        const DRAG_THRESHOLD = 5;
-
-        // Selection Box State
-        let selectionStart = { x: 0, y: 0 };
-        let selectionEnd = { x: 0, y: 0 };
-
-
-        let colors = {};
-        let visibleSpawners = new Set();
-
-        // Context menu state
-        let contextMenuData = null;
-        let lastClickEvent = null;
-
-        function resizeCanvas() {
-            const size = canvas.getBoundingClientRect().width;
-            canvas.width = size;
-            canvas.height = size;
+    function updateMasterZoomFromInput(value) {
+        const percentage = parseFloat(value);
+        if (!isNaN(percentage) && percentage > 0) {
+            masterZoom = Math.max(0.1, Math.min(50, percentage / 100.0));
             renderMap();
         }
+    }
 
-        function toggleLock() {
-            isViewLocked = !isViewLocked;
-            const lockBtn = document.getElementById('lockBtn');
-            const lockStatus = document.getElementById('lockStatus');
-            
-            if (isViewLocked) {
-                lockedViewState = {
-                    scale: scale,
-                    offsetX: offsetX,
-                    offsetY: offsetY,
-                    imageScale: imageScale,
-                    imageOffsetX: imageOffsetX,
-                    imageOffsetY: imageOffsetY,
-                    masterZoom: masterZoom,
-                    masterOffsetX: masterOffsetX,
-                    masterOffsetY: masterOffsetY
-                };
-                lockBtn.textContent = '🔒 Locked';
-                lockBtn.classList.add('locked');
-                lockStatus.textContent = 'View is LOCKED. Drag to select. Alt-Drag to pan.';
-                lockStatus.classList.add('locked');
-                canvas.classList.add('locked-view');
-            } else {
-                lockedViewState = null;
-                lockBtn.textContent = '🔓 Unlocked';
-                lockBtn.classList.remove('locked');
-                lockStatus.textContent = 'View is UNLOCKED. Drag to pan map. Alt-Drag to pan image.';
-                lockStatus.classList.remove('locked');
-                canvas.classList.remove('locked-view');
-            }
+    function generateColor(index) { return `hsl(${(index * 137.508) % 360}, 70%, 60%)`; }
+    function updateDataScaleFromInput(value) {
+        const percentage = parseFloat(value);
+        if (!isNaN(percentage) && percentage > 0) { scale = percentage / 100.0; renderMap(); }
+    }
+
+    function showPopupBubble(x, y, message, duration = 2000) {
+        const bubble = document.getElementById('popupBubble');
+        Object.assign(bubble.style, { left: `${x}px`, top: `${y}px`, display: 'block', opacity: '1' });
+        setTimeout(() => {
+            bubble.style.opacity = '0';
+            setTimeout(() => { bubble.style.display = 'none'; }, 300);
+        }, duration);
+    }
+
+    function showCopyFeedback(x, y) {
+        const feedback = document.getElementById('copyFeedback');
+        Object.assign(feedback.style, { left: `${x}px`, top: `${y}px`, display: 'block' });
+        setTimeout(() => { feedback.style.display = 'none'; }, 1500);
+    }
+
+    function showConfirmationBubble(x, y) {
+        const bubble = document.getElementById('confirmationBubble');
+        Object.assign(bubble.style, { left: `${x}px`, top: `${y}px`, display: 'block' });
+        setTimeout(() => document.addEventListener('click', handleClickOutsideConfirmation, true), 0);
+    }
+
+    function hideConfirmationBubble() {
+        document.getElementById('confirmationBubble').style.display = 'none';
+        document.removeEventListener('click', handleClickOutsideConfirmation, true);
+    }
+
+    function handleClickOutsideConfirmation(e) {
+        if (!document.getElementById('confirmationBubble').contains(e.target)) {
+            e.preventDefault(); e.stopPropagation(); cancelReset();
         }
+    }
 
-        function applyLockedViewState() {
-            if (isViewLocked && lockedViewState) {
-                scale = lockedViewState.scale;
-                offsetX = lockedViewState.offsetX;
-                offsetY = lockedViewState.offsetY;
-                imageScale = lockedViewState.imageScale;
-                imageOffsetX = lockedViewState.imageOffsetX;
-                imageOffsetY = lockedViewState.imageOffsetY;
-                masterZoom = lockedViewState.masterZoom;
-                masterOffsetX = lockedViewState.masterOffsetX;
-                masterOffsetY = lockedViewState.masterOffsetY;
-                
-                document.getElementById('imageScaleInput').value = (imageScale * 100).toFixed(1);
-                document.getElementById('dataScaleInput').value = (scale * 100).toFixed(1);
-                document.getElementById('masterZoomInput').value = (masterZoom * 100).toFixed(0);
-            }
+    function resetAllPositions(e) {
+        if (isViewLocked) { showPopupBubble(e.clientX + 10, e.clientY - 30, "Positions are locked"); return; }
+        showConfirmationBubble(e.clientX - 100, e.clientY - 50);
+    }
+
+    function confirmReset() { hideConfirmationBubble(); resetView(); }
+    function cancelReset() { hideConfirmationBubble(); }
+
+    function showContextMenu(e, points) {
+        if (!points || points.length === 0) return;
+        hideContextMenu();
+        contextMenuData = points;
+        lastRightClickEvent = e;
+        const menu = document.getElementById('contextMenu');
+        Object.assign(menu.style, { left: `${e.clientX}px`, top: `${e.clientY}px`, display: 'block' });
+        const menuRect = menu.getBoundingClientRect();
+        if (menuRect.right > window.innerWidth) menu.style.left = `${e.clientX - menuRect.width}px`;
+        if (menuRect.bottom > window.innerHeight) menu.style.top = `${e.clientY - menuRect.height}px`;
+        setTimeout(() => document.addEventListener('click', handleClickOutsideContextMenu, true), 0);
+    }
+
+    function hideContextMenu() {
+        document.getElementById('contextMenu').style.display = 'none';
+        document.removeEventListener('click', handleClickOutsideContextMenu, true);
+    }
+    
+    // This function now handles clearing the highlight as well
+    function clearAndHide() {
+        hideContextMenu();
+        selectedPoints = []; // Clear the selection
+        renderMap(); // Re-render to remove highlights
+    }
+
+    function handleClickOutsideContextMenu(e) {
+        const menu = document.getElementById('contextMenu');
+        if (!menu.contains(e.target)) {
+            e.preventDefault();
+            e.stopPropagation();
+            clearAndHide(); // Clear selection when clicking away
         }
+    }
 
-        function updateMasterZoomFromInput(value) {
-            const percentage = parseFloat(value);
-            if (isNaN(percentage) || percentage <= 0) return;
-            masterZoom = percentage / 100.0;
-            masterZoom = Math.max(0.1, Math.min(50, masterZoom));
-            renderMap();
-        }
+    function copyIDs() {
+        if (!contextMenuData || contextMenuData.length === 0) return;
+        const ids = contextMenuData.map(p => p.id.toString()).join('\n');
+        navigator.clipboard.writeText(ids).then(() => showCopyFeedback(lastRightClickEvent.clientX, lastRightClickEvent.clientY - 30));
+        clearAndHide();
+    }
 
-        function generateColor(index) {
-            const hue = (index * 137.508) % 360;
-            return `hsl(${hue}, 70%, 60%)`;
-        }
-        
-        function updateStatus(message) { document.getElementById('status').textContent = message; }
+    function copyPositionsAndIDs() {
+        if (!contextMenuData || contextMenuData.length === 0) return;
+        const lines = contextMenuData.map(pos => {
+            const spawner = mapData.spawnerTypes[pos.type]?.instances.find(i => i.id === pos.id);
+            const posArray = spawner ? JSON.stringify(spawner.originalData.position) : `[${-pos.z}, 0, ${pos.x}, 1]`;
+            return `"position": ${posArray},\n"id": ${pos.id}`;
+        }).join('\n\n');
+        navigator.clipboard.writeText(lines).then(() => showCopyFeedback(lastRightClickEvent.clientX, lastRightClickEvent.clientY - 30));
+        clearAndHide();
+    }
 
-        function updateDataScaleFromInput(value) {
-            const percentage = parseFloat(value);
-            if (isNaN(percentage) || percentage <= 0) return;
-            scale = percentage / 100.0;
-            renderMap();
-        }
+    function copyAdrAndIDs() {
+        if (!contextMenuData || contextMenuData.length === 0) return;
+        const typeGroups = contextMenuData.reduce((acc, pos) => {
+            (acc[pos.type] = acc[pos.type] || []).push(pos.id);
+            return acc;
+        }, {});
+        const lines = Object.entries(typeGroups).map(([type, ids]) => `"${type}.adr": [${ids.join(', ')}]`);
+        navigator.clipboard.writeText(lines.join('\n')).then(() => showCopyFeedback(lastRightClickEvent.clientX, lastRightClickEvent.clientY - 30));
+        clearAndHide();
+    }
 
-        function showPopupBubble(x, y, message, duration = 2000) {
-            const bubble = document.getElementById('popupBubble');
-            bubble.textContent = message;
-            bubble.style.left = x + 'px';
-            bubble.style.top = y + 'px';
-            bubble.style.display = 'block';
-            bubble.style.opacity = '1';
-            
-            setTimeout(() => {
-                bubble.style.opacity = '0';
-                setTimeout(() => { bubble.style.display = 'none'; }, 300);
-            }, duration);
-        }
-
-        function showCopyFeedback(x, y) {
-            const feedback = document.getElementById('copyFeedback');
-            feedback.style.left = x + 'px';
-            feedback.style.top = y + 'px';
-            feedback.style.display = 'block';
-            
-            setTimeout(() => { feedback.style.display = 'none'; }, 1500);
-        }
-
-        function showConfirmationBubble(x, y) {
-            const bubble = document.getElementById('confirmationBubble');
-            bubble.style.left = x + 'px';
-            bubble.style.top = y + 'px';
-            bubble.style.display = 'block';
-            
-            setTimeout(() => {
-                document.addEventListener('click', handleClickOutsideConfirmation, true);
-            }, 0);
-        }
-
-        function hideConfirmationBubble() {
-            const bubble = document.getElementById('confirmationBubble');
-            bubble.style.display = 'none';
-            document.removeEventListener('click', handleClickOutsideConfirmation, true);
-        }
-
-        function handleClickOutsideConfirmation(e) {
-            const bubble = document.getElementById('confirmationBubble');
-            if (!bubble.contains(e.target)) {
-                e.preventDefault();
-                e.stopPropagation();
-                cancelReset();
-            }
-        }
-
-        function resetAllPositions(e) {
-            if (isViewLocked) {
-                showPopupBubble(e.clientX + 10, e.clientY - 30, "Unlock the view to reset positions");
-                return;
-            }
-            showConfirmationBubble(e.clientX - 100, e.clientY - 50);
-        }
-
-        function confirmReset() { hideConfirmationBubble(); resetView(); }
-        function cancelReset() { hideConfirmationBubble(); }
-
-        function showContextMenu(e, points) {
-            hideContextMenu();
-            contextMenuData = points;
-            lastClickEvent = e;
-            
-            const contextMenu = document.getElementById('contextMenu');
-            contextMenu.style.left = e.clientX + 'px';
-            contextMenu.style.top = e.clientY + 'px';
-            contextMenu.style.display = 'block';
-            
-            const menuRect = contextMenu.getBoundingClientRect();
-            if (menuRect.right > window.innerWidth) contextMenu.style.left = (e.clientX - menuRect.width) + 'px';
-            if (menuRect.bottom > window.innerHeight) contextMenu.style.top = (e.clientY - menuRect.height) + 'px';
-            
-            setTimeout(() => {
-                document.addEventListener('click', handleClickOutsideContextMenu, true);
-            }, 0);
-        }
-
-        function hideContextMenu() {
-            const contextMenu = document.getElementById('contextMenu');
-            if(contextMenu) contextMenu.style.display = 'none';
-            document.removeEventListener('click', handleClickOutsideContextMenu, true);
-        }
-
-        function handleClickOutsideContextMenu(e) {
-            const contextMenu = document.getElementById('contextMenu');
-            if (contextMenu && !contextMenu.contains(e.target)) {
-                e.preventDefault();
-                e.stopPropagation();
-                hideContextMenu();
-            }
-        }
-
-        function copyIDs() {
-            if (!contextMenuData || !mapData) return;
-            const ids = contextMenuData.map(pos => pos.id.toString()).join('\n');
-            navigator.clipboard.writeText(ids).then(() => {
-                showCopyFeedback(lastClickEvent.clientX, lastClickEvent.clientY - 30);
-            });
-            hideContextMenu();
-        }
-
-        function copyPositionsAndIDs() {
-            if (!contextMenuData || !mapData) return;
-            const lines = contextMenuData.map(pos => {
-                const spawnerType = mapData.spawnerTypes[pos.type];
-                if (spawnerType) {
-                    const instance = spawnerType.instances.find(inst => inst.id === pos.id);
-                    if (instance && instance.originalData) {
-                        return `"position": ${JSON.stringify(instance.originalData.position)},\n"id": ${pos.id}`;
-                    }
+    async function processFile() {
+        const fileInput = document.getElementById('fileInput');
+        if (!fileInput.files[0]) { alert('Please select a file first'); return; }
+        try {
+            const data = JSON.parse(await fileInput.files[0].text());
+            const spawnerTypes = {};
+            const allPositions = [];
+            let totalItems = 0;
+            for (const spawner of data) {
+                const type = spawner.actorDefinition.replace('.adr', '');
+                if (!spawnerTypes[type]) spawnerTypes[type] = { name: type, instances: [], count: 0 };
+                for (const instance of spawner.instances) {
+                    const pos = { x: instance.position[2], z: -instance.position[0], type, id: instance.id, originalData: instance };
+                    spawnerTypes[type].instances.push(pos);
+                    allPositions.push(pos);
+                    totalItems++;
                 }
-                return `"position": [${-pos.z}, 0, ${pos.x}, 1],\n"id": ${pos.id}`;
-            }).join('\n\n');
-            navigator.clipboard.writeText(lines).then(() => {
-                showCopyFeedback(lastClickEvent.clientX, lastClickEvent.clientY - 30);
-            });
-            hideContextMenu();
-        }
-
-        function copyAdrAndIDs() {
-            if (!contextMenuData || !mapData) return;
-            const typeGroups = {};
-            contextMenuData.forEach(pos => {
-                if (!typeGroups[pos.type]) typeGroups[pos.type] = [];
-                typeGroups[pos.type].push(pos.id);
-            });
-            const lines = Object.entries(typeGroups).map(([type, ids]) => `"${type}.adr": [${ids.join(', ')}]`);
-            navigator.clipboard.writeText(lines.join('\n')).then(() => {
-                showCopyFeedback(lastClickEvent.clientX, lastClickEvent.clientY - 30);
-            });
-            hideContextMenu();
-        }
-
-        async function processFile() {
-            const file = document.getElementById('fileInput').files[0];
-            if (!file) { alert('Please select a file first'); return; }
-            try {
-                const data = JSON.parse(await file.text());
-                const spawnerTypes = {};
-                const allPositions = [];
-                let totalItems = 0;
-                for (const spawner of data) {
-                    const type = spawner.actorDefinition.replace('.adr', '');
-                    if (!spawnerTypes[type]) spawnerTypes[type] = { name: type, instances: [], count: 0 };
-                    for (const instance of spawner.instances) {
-                        const pos = { x: instance.position[2], z: -instance.position[0], type, id: instance.id, originalData: instance };
-                        spawnerTypes[type].instances.push(pos);
-                        allPositions.push(pos);
-                        totalItems++;
-                    }
-                    spawnerTypes[type].count = spawner.instances.length;
-                }
-                const bounds = {
-                    minX: Math.min(...allPositions.map(p => p.x)), maxX: Math.max(...allPositions.map(p => p.x)),
-                    minZ: Math.min(...allPositions.map(p => p.z)), maxZ: Math.max(...allPositions.map(p => p.z))
-                };
-                Object.keys(spawnerTypes).forEach((type, i) => {
-                    colors[type] = generateColor(i);
-                    visibleSpawners.add(type);
-                });
-                mapData = { spawnerTypes, allPositions, bounds, totalItems };
-                
-                if (!isViewLocked) resetView();
-                
-                resizeCanvas();
-                applyLockedViewState();
-                updateStats();
-                updateSpawnerControls();
-                document.getElementById('spawnerControls').style.display = 'block';
-                
-                const successStatus = document.getElementById('successStatus');
-                successStatus.textContent = `Successfully processed ${totalItems} items from ${Object.keys(spawnerTypes).length} spawner types`;
-                successStatus.style.display = 'block';
-                
-            } catch (error) { console.error('Error:', error); }
-        }
-        
-        function loadMapImage() {
-            const file = document.getElementById('mapImageInput').files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = e => {
-                mapImage = new Image();
-                mapImage.onload = () => {
-                    const imageStatus = document.getElementById('imageStatus');
-                    imageStatus.textContent = `Map image loaded: ${mapImage.width}x${mapImage.height}`;
-                    imageStatus.classList.add('loaded');
-                    if (!isViewLocked) resetImageTransform(); else applyLockedViewState();
-                    renderMap();
-                }
-                mapImage.src = e.target.result;
+                spawnerTypes[type].count = spawner.instances.length;
             }
-            reader.readAsDataURL(file);
-        }
+            const bounds = {
+                minX: Math.min(...allPositions.map(p => p.x)), maxX: Math.max(...allPositions.map(p => p.x)),
+                minZ: Math.min(...allPositions.map(p => p.z)), maxZ: Math.max(...allPositions.map(p => p.z))
+            };
+            Object.keys(spawnerTypes).forEach((type, i) => { colors[type] = generateColor(i); visibleSpawners.add(type); });
+            mapData = { spawnerTypes, allPositions, bounds, totalItems };
+            if (!isViewLocked) { scale = 1; offsetX = 0; offsetY = 0; document.getElementById('dataScaleInput').value = "100.0"; }
+            applyLockedViewState(); updateStats(); updateSpawnerControls();
+            document.getElementById('spawnerControls').style.display = 'block';
+            const successStatus = document.getElementById('successStatus');
+            successStatus.textContent = `Processed ${totalItems} items, ${Object.keys(spawnerTypes).length} types`;
+            successStatus.style.display = 'block';
+        } catch (error) { console.error('File processing error:', error); alert('Error processing file. See console.'); }
+    }
 
-        function updateImageOpacity(value) { imageOpacity = parseFloat(value); renderMap(); }
-        function updateImageScaleFromInput(value) {
-            const percentage = parseFloat(value);
-            if (!isNaN(percentage) && percentage > 0) { imageScale = percentage / 100.0; renderMap(); }
-        }
+    function loadMapImage() {
+        const file = document.getElementById('mapImageInput').files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            mapImage = new Image();
+            mapImage.onload = () => {
+                const status = document.getElementById('imageStatus');
+                status.textContent = `Map image: ${mapImage.width}x${mapImage.height}`;
+                status.classList.add('loaded');
+                if (!isViewLocked) resetImageTransform();
+                else applyLockedViewState();
+                renderMap();
+            };
+            mapImage.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
 
-        function resetImageTransform() {
-            imageScale = 1; imageOffsetX = 0; imageOffsetY = 0;
-            document.getElementById('imageScaleInput').value = "100.0";
-            if(mapImage) renderMap();
-        }
+    function updateImageOpacity(value) { imageOpacity = parseFloat(value); renderMap(); }
+    function updateImageScaleFromInput(value) {
+        const p = parseFloat(value);
+        if (!isNaN(p) && p > 0) { imageScale = p / 100.0; renderMap(); }
+    }
+    function resetImageTransform() {
+        imageScale = 1; imageOffsetX = 0; imageOffsetY = 0;
+        document.getElementById('imageScaleInput').value = "100.0";
+        if (mapImage) renderMap();
+    }
+    function resetView() {
+        scale = 1; offsetX = 0; offsetY = 0;
+        masterZoom = 1; masterOffsetX = 0; masterOffsetY = 0;
+        document.getElementById('dataScaleInput').value = "100.0";
+        document.getElementById('masterZoomInput').value = "100";
+        resetImageTransform(); renderMap();
+    }
 
-        function resetView() {
-            scale = 1; offsetX = 0; offsetY = 0;
-            masterZoom = 1; masterOffsetX = 0; masterOffsetY = 0;
-            document.getElementById('dataScaleInput').value = "100.0";
-            document.getElementById('masterZoomInput').value = "100";
-            resetImageTransform();
-        }
-        
-        function clientToWorld(clientX, clientY) {
-            const rect = canvas.getBoundingClientRect();
-            const canvasX = clientX - rect.left;
-            const canvasY = clientY - rect.top;
-            const worldX = (canvasX - canvas.width / 2) / masterZoom + canvas.width / 2 - masterOffsetX;
-            const worldY = (canvasY - canvas.height / 2) / masterZoom + canvas.height / 2 - masterOffsetY;
-            return { x: worldX, y: worldY };
-        }
-
-        function renderMap() {
-            if (!canvas.width) return;
+    function renderMap() {
+        if (!canvas.width) return;
+        requestAnimationFrame(() => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.save();
-            ctx.translate(canvas.width/2, canvas.height/2);
-            ctx.scale(masterZoom, masterZoom);
-            ctx.translate(masterOffsetX, masterOffsetY);
-            ctx.translate(-canvas.width/2, -canvas.height/2);
+            if (isSelecting && selectionRect) {
+                const rect = selectionRect;
+                const x = Math.min(rect.x, rect.x + rect.width);
+                const y = Math.min(rect.y, rect.y + rect.height);
+                const w = Math.abs(rect.width);
+                const h = Math.abs(rect.height);
+                ctx.fillStyle = 'rgba(200, 200, 200, 0.2)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.lineWidth = 1;
+                ctx.fillRect(x, y, w, h);
+                ctx.strokeRect(x, y, w, h);
+            }
+            if (!mapData) return;
 
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(masterZoom, masterZoom);
+            ctx.translate(-canvas.width / 2 + masterOffsetX, -canvas.height / 2 + masterOffsetY);
             if (mapImage) {
                 ctx.globalAlpha = imageOpacity;
                 ctx.drawImage(mapImage, imageOffsetX, imageOffsetY, mapImage.width * imageScale, mapImage.height * imageScale);
                 ctx.globalAlpha = 1.0;
             }
+            const { bounds, allPositions } = mapData;
+            const margin = 50;
+            const mapScale = Math.min((canvas.width - 2 * margin) / (bounds.maxX - bounds.minX), (canvas.height - 2 * margin) / (bounds.maxZ - bounds.minZ)) * scale;
+            const centerX = (bounds.minX + bounds.maxX) / 2;
+            const centerZ = (bounds.minZ + bounds.maxZ) / 2;
+            for (const pos of allPositions) {
+                if (!visibleSpawners.has(pos.type)) continue;
+                const screenX = (pos.x - centerX) * mapScale + (canvas.width / 2) + offsetX;
+                const screenZ = (pos.z - centerZ) * mapScale + (canvas.height / 2) + offsetY;
 
-            if (mapData) {
-                const { bounds, allPositions } = mapData;
-                const dataRangeX = bounds.maxX - bounds.minX;
-                const dataRangeZ = bounds.maxZ - bounds.minZ;
-                const mapScale = (canvas.width / (dataRangeX > 0 ? dataRangeX : canvas.width)) * scale;
-                const centerX = (bounds.minX + bounds.maxX) / 2;
-                const centerZ = (bounds.minZ + bounds.maxZ) / 2;
-                const canvasCenterX = canvas.width / 2 + offsetX;
-                const canvasCenterZ = canvas.height / 2 + offsetY;
-
-                for (const pos of allPositions) {
-                    if (!visibleSpawners.has(pos.type)) continue;
-                    const screenX = (pos.x - centerX) * mapScale + canvasCenterX;
-                    const screenZ = (pos.z - centerZ) * mapScale + canvasCenterZ;
-                    
-                    const transformedPointX = (screenX - canvas.width / 2) * masterZoom + canvas.width / 2 + masterOffsetX * masterZoom;
-                    const transformedPointY = (screenZ - canvas.height / 2) * masterZoom + canvas.height / 2 + masterOffsetY * masterZoom;
-
-                    if (transformedPointX < -10 || transformedPointX > window.innerWidth + 10 || transformedPointY < -10 || transformedPointY > window.innerHeight + 10) continue;
-
-                    ctx.fillStyle = colors[pos.type];
+                if (selectedPoints.some(p => p.id === pos.id && p.type === pos.type)) {
+                    ctx.strokeStyle = '#ffffff'; // White highlight
+                    ctx.lineWidth = Math.max(0.2, 1 / masterZoom); // Thinner line
                     ctx.beginPath();
-                    ctx.arc(screenX, screenZ, Math.max(0.1, 2 / masterZoom), 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.arc(screenX, screenZ, Math.max(0.4, 3.5 / masterZoom), 0, Math.PI * 2); // Slightly larger radius
+                    ctx.stroke();
                 }
-            }
 
-            if (isSelecting) {
-                const worldStart = clientToWorld(selectionStart.x, selectionStart.y);
-                const worldEnd = clientToWorld(selectionEnd.x, selectionEnd.y);
-                ctx.fillStyle = "rgba(0, 100, 255, 0.3)";
-                ctx.strokeStyle = "rgba(0, 100, 255, 0.8)";
-                ctx.lineWidth = 1 / masterZoom;
-                ctx.fillRect(worldStart.x, worldStart.y, worldEnd.x - worldStart.x, worldEnd.y - worldStart.y);
-                ctx.strokeRect(worldStart.x, worldStart.y, worldEnd.x - worldStart.x, worldEnd.y - worldStart.y);
+                ctx.fillStyle = colors[pos.type];
+                ctx.beginPath();
+                ctx.arc(screenX, screenZ, Math.max(0.1, 2 / masterZoom), 0, Math.PI * 2);
+                ctx.fill();
             }
             ctx.restore();
+        });
+    }
+
+    function updateStats() {
+        if (!mapData) return;
+        let visibleItems = 0, visibleTypes = 0;
+        for (const type of visibleSpawners) {
+            visibleItems += mapData.spawnerTypes[type].count;
+            visibleTypes++;
         }
-        
-        function updateStats() { 
-            if (!mapData) return; 
-            const { spawnerTypes, totalItems } = mapData; 
-            let visibleItems = 0; 
-            let visibleTypes = 0; 
-            visibleSpawners.forEach(type => {
-                if (spawnerTypes[type]) {
-                    visibleItems += spawnerTypes[type].count;
-                    visibleTypes++;
-                }
-            });
-            document.getElementById('stats').innerHTML = `
-                <div class="stat-item"><div class="stat-value">${visibleItems}</div><div class="stat-label">Visible Items</div></div>
-                <div class="stat-item"><div class="stat-value">${totalItems}</div><div class="stat-label">Total Items</div></div>
-                <div class="stat-item"><div class="stat-value">${visibleTypes}</div><div class="stat-label">Visible Types</div></div>
-                <div class="stat-item"><div class="stat-value">${Object.keys(spawnerTypes).length}</div><div class="stat-label">Total Types</div></div>
-            `; 
+        document.getElementById('stats').innerHTML = `
+            <div class="stat-item"><div class="stat-value">${visibleItems}</div><div class="stat-label">Visible Items</div></div>
+            <div class="stat-item"><div class="stat-value">${mapData.totalItems}</div><div class="stat-label">Total Items</div></div>
+            <div class="stat-item"><div class="stat-value">${visibleTypes}</div><div class="stat-label">Visible Types</div></div>
+            <div class="stat-item"><div class="stat-value">${Object.keys(mapData.spawnerTypes).length}</div><div class="stat-label">Total Types</div></div>`;
+    }
+
+    function updateSpawnerControls() {
+        if (!mapData) return;
+        const sorted = Object.values(mapData.spawnerTypes).sort((a, b) => b.count - a.count);
+        document.getElementById('spawnerGrid').innerHTML = sorted.map(type => `
+            <div class="spawner-item" data-spawner="${type.name}">
+                <input type="checkbox" class="spawner-checkbox" id="spawner-${type.name}" ${visibleSpawners.has(type.name) ? 'checked' : ''} onchange="toggleSpawner('${type.name}')">
+                <div class="spawner-color" style="background-color: ${colors[type.name]}"></div>
+                <label class="spawner-label" for="spawner-${type.name}">${type.name} <span class="spawner-count">(${type.count})</span></label>
+            </div>`).join('');
+    }
+    
+    canvas.addEventListener('mousedown', e => {
+        if (e.button !== 0) return; // Only left-click
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        isDragging = true;
+        clearAndHide(); // Clear previous selection and menu
+        if (isViewLocked) {
+            if (e.altKey) {
+                isPanning = true;
+                canvas.style.cursor = 'grabbing';
+            } else {
+                isSelecting = true;
+                const rect = canvas.getBoundingClientRect();
+                selectionRect = { x: e.clientX - rect.left, y: e.clientY - rect.top, width: 0, height: 0 };
+            }
+        } else {
+            isPanning = true;
+            canvas.style.cursor = 'grabbing';
         }
-        
-        function updateSpawnerControls() { 
-            if (!mapData) return; 
-            const sortedTypes = Object.values(mapData.spawnerTypes).sort((a, b) => b.count - a.count); 
-            document.getElementById('spawnerGrid').innerHTML = sortedTypes.map(type => `
-                <div class="spawner-item" data-spawner="${type.name}">
-                    <input type="checkbox" class="spawner-checkbox" id="spawner-${type.name}" ${visibleSpawners.has(type.name) ? 'checked' : ''} onchange="toggleSpawner('${type.name}')">
-                    <div class="spawner-color" style="background-color: ${colors[type.name]}"></div>
-                    <label class="spawner-label" for="spawner-${type.name}">${type.name} <span class="spawner-count">(${type.count})</span></label>
-                </div>
-            `).join('');
-        }
-        
-        function zoom(factor) { 
+    });
+
+    canvas.addEventListener('mousemove', e => {
+        if (!isDragging) { showTooltip(e); return; }
+        hideTooltip();
+        const deltaX = e.clientX - lastMouseX;
+        const deltaY = e.clientY - lastMouseY;
+
+        if (isSelecting) {
             const rect = canvas.getBoundingClientRect();
-            handleWheel({ clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2, deltaY: factor > 1 ? -1 : 1, preventDefault: () => {} });
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+            selectionRect.width = currentX - selectionRect.x;
+            selectionRect.height = currentY - selectionRect.y;
+        } else if (isPanning) {
+            if (isViewLocked) { // Alt-drag pan in locked
+                masterOffsetX += deltaX / masterZoom;
+                masterOffsetY += deltaY / masterZoom;
+            } else if (e.altKey) { // Unlocked image pan
+                imageOffsetX += deltaX;
+                imageOffsetY += deltaY;
+            } else { // Unlocked data pan
+                offsetX += deltaX;
+                offsetY += deltaY;
+            }
         }
-        
-        canvas.addEventListener('mousedown', e => {
-            if (e.button !== 0) return; // Only for left click
-            isMouseDown = true;
-            isDragging = false;
-            isSelecting = false;
-            dragStartPoint = { x: e.clientX, y: e.clientY };
-            lastMouseX = e.clientX;
-            lastMouseY = e.clientY;
-            hideContextMenu();
-        });
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        renderMap();
+    });
 
-        canvas.addEventListener('mousemove', e => {
-            if (!isMouseDown) { showTooltip(e); return; }
-            hideTooltip();
-
-            if (!isDragging) {
-                if (Math.hypot(e.clientX - dragStartPoint.x, e.clientY - dragStartPoint.y) > DRAG_THRESHOLD) {
-                    isDragging = true;
-                }
-            }
-
-            if (isDragging) {
-                const deltaX = e.clientX - lastMouseX;
-                const deltaY = e.clientY - lastMouseY;
-
-                if (e.altKey) {
-                    isSelecting = false;
-                    canvas.style.cursor = 'grabbing';
-                    masterOffsetX += deltaX / masterZoom;
-                    masterOffsetY += deltaY / masterZoom;
-                } else if (isViewLocked) {
-                    isSelecting = true;
-                    selectionStart = dragStartPoint;
-                    selectionEnd = { x: e.clientX, y: e.clientY };
-                } else {
-                    isSelecting = false;
-                    canvas.style.cursor = 'grabbing';
-                    offsetX += deltaX;
-                    offsetY += deltaY;
-                }
-                renderMap();
-            }
-
-            lastMouseX = e.clientX;
-            lastMouseY = e.clientY;
-        });
-
-        canvas.addEventListener('mouseup', e => {
-            if (e.button !== 0) return; // Only for left click
-            if (isSelecting) {
-                handleSelection(e);
-            } else if (!isDragging && mapData) {
-                const nearbyPoints = getNearbyPoints(e);
-                if (nearbyPoints.length > 0) showContextMenu(e, nearbyPoints);
-            }
-            isMouseDown = false; isDragging = false; isSelecting = false;
-            canvas.style.cursor = isViewLocked ? 'crosshair' : 'grab';
-            renderMap();
-        });
-        
-        canvas.addEventListener('mouseleave', () => { 
-            isMouseDown = false; isDragging = false;
-            if(isSelecting) renderMap();
-            isSelecting = false; hideTooltip();
-            canvas.style.cursor = isViewLocked ? 'crosshair' : 'grab';
-        });
-
-        canvas.addEventListener('contextmenu', e => {
-             // Allow default right-click menu
-        });
-        
-        const handleWheel = e => {
-            e.preventDefault();
-            const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
-            const worldMouse = clientToWorld(e.clientX, e.clientY);
-
-            if (!isViewLocked && e.altKey) {
-                 imageScale *= zoomFactor;
-                 document.getElementById('imageScaleInput').value = (imageScale * 100).toFixed(1);
-            } else {
-                 if (isViewLocked) {
-                     masterZoom *= zoomFactor;
-                     document.getElementById('masterZoomInput').value = (masterZoom * 100).toFixed(0);
-                 } else {
-                     scale *= zoomFactor;
-                     document.getElementById('dataScaleInput').value = (scale * 100).toFixed(1);
-                 }
-            }
-
-            const newWorldMouse = clientToWorld(e.clientX, e.clientY);
-            
-            // Adjust offset to keep the point under the mouse stationary
-            if (isViewLocked) {
-                 masterOffsetX += worldMouse.x - newWorldMouse.x;
-                 masterOffsetY += worldMouse.y - newWorldMouse.y;
-            } else if (!e.altKey) {
-                 offsetX += worldMouse.x - newWorldMouse.x;
-                 offsetY += worldMouse.y - newWorldMouse.y;
-            }
-            renderMap();
-        };
-        canvas.addEventListener('wheel', handleWheel);
-
-        function getNearbyPoints(e) {
-            const worldMouse = clientToWorld(e.clientX, e.clientY);
-            const { bounds, allPositions } = mapData; 
-            const mapScale = (canvas.width / (bounds.maxX - bounds.minX)) * scale; 
-            const centerX = (bounds.minX + bounds.maxX) / 2; 
-            const centerZ = (bounds.minZ + bounds.maxZ) / 2; 
-            const canvasCenterX = canvas.width / 2 + offsetX; 
-            const canvasCenterZ = canvas.height / 2 + offsetY;
-            
-            const nearbyPoints = [];
-            const detectionRadius = 10 / masterZoom;
-            
-            for (const pos of allPositions) {
-                if (!visibleSpawners.has(pos.type)) continue;
-                const worldScreenX = (pos.x - centerX) * mapScale + canvasCenterX;
-                const worldScreenZ = (pos.z - centerZ) * mapScale + canvasCenterZ;
-                if (Math.hypot(worldMouse.x - worldScreenX, worldMouse.y - worldScreenZ) < detectionRadius) {
-                    nearbyPoints.push(pos);
-                }
-            }
-            return nearbyPoints;
-        }
-
-        function handleSelection(e) {
-            if (!mapData) return;
-            const worldStart = clientToWorld(selectionStart.x, selectionStart.y);
-            const worldEnd = clientToWorld(selectionEnd.x, selectionEnd.y);
-            const selectionRect = {
-                x1: Math.min(worldStart.x, worldEnd.x), y1: Math.min(worldStart.y, worldEnd.y),
-                x2: Math.max(worldStart.x, worldEnd.x), y2: Math.max(worldStart.y, worldEnd.y)
+    canvas.addEventListener('mouseup', e => {
+        if (e.button !== 0 || !isDragging) return;
+        canvas.style.cursor = 'crosshair';
+        if (isSelecting) {
+            const finalRect = {
+                x: Math.min(selectionRect.x, selectionRect.x + selectionRect.width),
+                y: Math.min(selectionRect.y, selectionRect.y + selectionRect.height),
+                width: Math.abs(selectionRect.width),
+                height: Math.abs(selectionRect.height)
             };
-
-            const selectedPoints = [];
-            const { bounds, allPositions } = mapData;
-            const mapScale = (canvas.width/(bounds.maxX-bounds.minX)) * scale;
-            const centerX = (bounds.minX + bounds.maxX) / 2, centerZ = (bounds.minZ + bounds.maxZ) / 2;
-            const canvasCenterX = canvas.width / 2 + offsetX, canvasCenterZ = canvas.height / 2 + offsetY;
-
-            for (const pos of allPositions) {
-                if (!visibleSpawners.has(pos.type)) continue;
-                const worldScreenX = (pos.x - centerX) * mapScale + canvasCenterX;
-                const worldScreenZ = (pos.z - centerZ) * mapScale + canvasCenterZ;
-                if (worldScreenX >= selectionRect.x1 && worldScreenX <= selectionRect.x2 &&
-                    worldScreenZ >= selectionRect.y1 && worldScreenZ <= selectionRect.y2) {
-                    selectedPoints.push(pos);
-                }
-            }
-            if (selectedPoints.length > 0) showContextMenu(e, selectedPoints);
-        }
-        
-        function showTooltip(e) { 
-            if (!mapData || isMouseDown) return; 
-            const tooltip = document.getElementById('tooltip');
-            const nearbyPoints = getNearbyPoints(e);
-            
-            if (nearbyPoints.length > 0) {
-                const typeCounts = nearbyPoints.reduce((acc, pos) => {
-                    acc[pos.type] = (acc[pos.type] || 0) + 1;
-                    return acc;
-                }, {});
-                
-                let tooltipContent = Object.entries(typeCounts).map(([type, count]) => `
-                    <div class="tooltip-item">
-                        <div class="tooltip-color" style="background-color: ${colors[type]}"></div>
-                        ${type} (${count} item${count > 1 ? 's' : ''})
-                    </div>`).join('');
-                
-                if (nearbyPoints.length === 1) {
-                    const pos = nearbyPoints[0];
-                    tooltipContent += `<div style="margin-top: 6px; font-size: 11px; color: #aaa;">
-                            Position: (${pos.x.toFixed(0)}, ${pos.z.toFixed(0)})<br>ID: ${pos.id}</div>`;
-                }
-                
-                tooltip.innerHTML = tooltipContent;
-                tooltip.style.display = 'block';
-                const tooltipRect = tooltip.getBoundingClientRect();
-                tooltip.style.left = (e.clientX + 15 + tooltipRect.width > window.innerWidth) ? (e.clientX - tooltipRect.width - 15) + 'px' : (e.clientX + 15) + 'px';
-                tooltip.style.top = (e.clientY + 15 + tooltipRect.height > window.innerHeight) ? (e.clientY - tooltipRect.height - 15) + 'px' : (e.clientY + 15) + 'px';
+            if (finalRect.width > 5 || finalRect.height > 5) {
+                selectedPoints = getPointsInSelection(finalRect);
             } else {
-                hideTooltip();
+                selectedPoints = getNearbyPoints(e);
+            }
+            
+            // This is the key fix: always re-render after determining selection
+            renderMap();
+            
+            if (selectedPoints.length > 0) {
+                showContextMenu(e, selectedPoints);
             }
         }
-        
-        function hideTooltip() { document.getElementById('tooltip').style.display = 'none'; }
-        
-        function toggleSpawner(spawnerName) { 
-            if (visibleSpawners.has(spawnerName)) visibleSpawners.delete(spawnerName); 
-            else visibleSpawners.add(spawnerName); 
-            renderMap(); updateStats(); 
+        isDragging = false; isPanning = false; isSelecting = false;
+        selectionRect = null;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        if (isDragging) {
+            isDragging = false; isPanning = false; isSelecting = false;
+            selectionRect = null;
+            canvas.style.cursor = 'crosshair';
+            hideTooltip(); renderMap();
         }
-        
-        function showAllSpawners() { 
-            if (!mapData) return; 
-            Object.keys(mapData.spawnerTypes).forEach(type => visibleSpawners.add(type));
-            document.querySelectorAll('.spawner-checkbox').forEach(cb => cb.checked = true); 
-            renderMap(); updateStats(); 
+    });
+
+    canvas.addEventListener('contextmenu', e => {
+        // No e.preventDefault(), allowing default browser menu to function normally.
+    });
+
+    canvas.addEventListener('wheel', e => {
+        e.preventDefault();
+        const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        if (!isViewLocked && e.altKey) {
+            imageScale *= zoomFactor;
+            document.getElementById('imageScaleInput').value = (imageScale * 100).toFixed(1);
+        } else {
+            const worldPoint = {
+                x: (mouseX - canvas.width / 2) / masterZoom - masterOffsetX + canvas.width / 2,
+                y: (mouseY - canvas.height / 2) / masterZoom - masterOffsetY + canvas.height / 2
+            };
+            if (isViewLocked) {
+                masterZoom *= zoomFactor;
+                masterZoom = Math.max(0.1, Math.min(50, masterZoom));
+                document.getElementById('masterZoomInput').value = (masterZoom * 100).toFixed(0);
+                masterOffsetX = (mouseX - canvas.width/2) / masterZoom - worldPoint.x + canvas.width/2;
+                masterOffsetY = (mouseY - canvas.height/2) / masterZoom - worldPoint.y + canvas.height/2;
+            } else {
+                scale *= zoomFactor;
+                scale = Math.max(0.1, Math.min(20, scale));
+                document.getElementById('dataScaleInput').value = (scale * 100).toFixed(1);
+            }
         }
-        
-        function hideAllSpawners() { 
-            visibleSpawners.clear(); 
-            document.querySelectorAll('.spawner-checkbox').forEach(cb => cb.checked = false); 
-            renderMap(); updateStats(); 
+        renderMap();
+    });
+
+    function getPointsInSelection(screenRect) {
+        if (!screenRect || !mapData) return [];
+        const points = [];
+        const { bounds, allPositions } = mapData;
+
+        const screenToWorldBase = (screenX, screenY) => ({
+            x: (screenX - canvas.width / 2) / masterZoom - masterOffsetX + canvas.width / 2,
+            y: (screenY - canvas.height / 2) / masterZoom - masterOffsetY + canvas.height / 2
+        });
+
+        const topLeft = screenToWorldBase(screenRect.x, screenRect.y);
+        const bottomRight = screenToWorldBase(screenRect.x + screenRect.width, screenRect.y + screenRect.height);
+
+        const worldBaseRect = {
+            x1: Math.min(topLeft.x, bottomRight.x),
+            y1: Math.min(topLeft.y, bottomRight.y),
+            x2: Math.max(topLeft.x, bottomRight.x),
+            y2: Math.max(topLeft.y, bottomRight.y),
+        };
+
+        const margin = 50;
+        const mapScale = Math.min((canvas.width - 2 * margin) / (bounds.maxX - bounds.minX), (canvas.height - 2 * margin) / (bounds.maxZ - bounds.minZ)) * scale;
+        const centerX = (bounds.minX + bounds.maxX) / 2;
+        const centerZ = (bounds.minZ + bounds.maxZ) / 2;
+
+        for (const pos of allPositions) {
+            if (!visibleSpawners.has(pos.type)) continue;
+            const baseScreenX = (pos.x - centerX) * mapScale + (canvas.width / 2) + offsetX;
+            const baseScreenY = (pos.z - centerZ) * mapScale + (canvas.height / 2) + offsetY;
+
+            if (baseScreenX >= worldBaseRect.x1 && baseScreenX <= worldBaseRect.x2 &&
+                baseScreenY >= worldBaseRect.y1 && baseScreenY <= worldBaseRect.y2) {
+                points.push(pos);
+            }
         }
+        return points;
+    }
+
+    function getNearbyPoints(e) {
+        if (!mapData) return [];
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const worldMouseX = (mouseX - canvas.width / 2) / masterZoom - masterOffsetX + canvas.width / 2;
+        const worldMouseY = (mouseY - canvas.height / 2) / masterZoom - masterOffsetY + canvas.height / 2;
         
-        function excludeBattleRoyale() { 
-            if (!mapData) return; 
-            Object.keys(mapData.spawnerTypes).forEach(type => {
-                if (!type.toLowerCase().includes('battleroyale')) visibleSpawners.add(type);
-                else visibleSpawners.delete(type);
-            });
-            document.querySelectorAll('.spawner-checkbox').forEach(cb => { 
-                cb.checked = visibleSpawners.has(cb.id.replace('spawner-', ''));
-            }); 
-            renderMap(); updateStats(); 
+        const points = [];
+        const detectionRadiusSq = Math.pow(10 / masterZoom, 2);
+        const { bounds, allPositions } = mapData;
+        const margin = 50;
+        const mapScale = Math.min((canvas.width - 2 * margin) / (bounds.maxX - bounds.minX), (canvas.height - 2 * margin) / (bounds.maxZ - bounds.minZ)) * scale;
+        const centerX = (bounds.minX + bounds.maxX) / 2;
+        const centerZ = (bounds.minZ + bounds.maxZ) / 2;
+        
+        for (const pos of allPositions) {
+            if (!visibleSpawners.has(pos.type)) continue;
+            const screenX = (pos.x - centerX) * mapScale + (canvas.width / 2) + offsetX;
+            const screenY = (pos.z - centerZ) * mapScale + (canvas.height / 2) + offsetY;
+            const distSq = Math.pow(worldMouseX - screenX, 2) + Math.pow(worldMouseY - screenY, 2);
+            if (distSq < detectionRadiusSq) points.push(pos);
         }
+        return points;
+    }
+
+    function showTooltip(e) {
+    const tooltip = document.getElementById('tooltip');
+    if (!mapData || isDragging) { tooltip.style.display = 'none'; return; }
+    const points = getNearbyPoints(e);
+    if (points.length > 0) {
+        const counts = points.reduce((acc, p) => ({...acc, [p.type]:(acc[p.type]||0)+1}), {});
+        let content = Object.entries(counts).map(([type,count])=>`<div class="tooltip-item"><div class="tooltip-color" style="background-color:${colors[type]}"></div>${type} (${count})</div>`).join('');
         
-        function filterSpawners() { 
-            const searchTerm = document.getElementById('spawnerSearch').value.toLowerCase(); 
-            document.querySelectorAll('.spawner-item').forEach(item => { 
-                item.style.display = item.dataset.spawner.toLowerCase().includes(searchTerm) ? 'flex' : 'none'; 
-            }); 
-        }
+        // This is the modified line - "Pos" has been removed.
+        if(points.length===1) content += `<div style="margin-top:6px;font-size:11px;color:#aaa;">ID: ${points[0].id}</div>`;
         
-        window.addEventListener('resize', resizeCanvas);
-    </script>
+        tooltip.innerHTML = content;
+        Object.assign(tooltip.style, {left: `${e.clientX+15}px`, top: `${e.clientY+15}px`, display:'block'});
+        const rect = tooltip.getBoundingClientRect();
+        if(rect.right > window.innerWidth) tooltip.style.left = `${e.clientX-rect.width-15}px`;
+        if(rect.bottom > window.innerHeight) tooltip.style.top = `${e.clientY-rect.height-15}px`;
+    } else {
+        tooltip.style.display = 'none';
+    }
+}
+    function hideTooltip() { document.getElementById('tooltip').style.display = 'none'; }
+    
+    function toggleSpawner(spawnerName) {
+        if (visibleSpawners.has(spawnerName)) visibleSpawners.delete(spawnerName);
+        else visibleSpawners.add(spawnerName);
+        renderMap(); updateStats();
+    }
+    function showAllSpawners() {
+        if (!mapData) return;
+        Object.keys(mapData.spawnerTypes).forEach(type => visibleSpawners.add(type));
+        document.querySelectorAll('.spawner-checkbox').forEach(cb => cb.checked = true);
+        renderMap(); updateStats();
+    }
+    function hideAllSpawners() {
+        visibleSpawners.clear();
+        document.querySelectorAll('.spawner-checkbox').forEach(cb => cb.checked = false);
+        renderMap(); updateStats();
+    }
+    function excludeBattleRoyale() {
+        if (!mapData) return;
+        Object.keys(mapData.spawnerTypes).forEach(type => {
+            const isBR = type.toLowerCase().includes('battleroyale');
+            const checkbox = document.getElementById(`spawner-${type}`);
+            if(isBR) visibleSpawners.delete(type); else visibleSpawners.add(type);
+            if(checkbox) checkbox.checked = !isBR;
+        });
+        renderMap(); updateStats();
+    }
+    function filterSpawners() {
+        const term = document.getElementById('spawnerSearch').value.toLowerCase();
+        document.querySelectorAll('.spawner-item').forEach(item => {
+            item.style.display = item.dataset.spawner.toLowerCase().includes(term) ? 'flex' : 'none';
+        });
+    }
+    
+    document.addEventListener('DOMContentLoaded', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas);
+</script>
 </body>
 </html>
